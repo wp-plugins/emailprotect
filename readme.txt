@@ -1,5 +1,5 @@
 === EMAILProtect ===
-Contributors: hallis, deadmau5
+Contributors: hallis
 Donate link: http://amateurs-exchange.blogspot.com/
 Tags: email, spiders, crawlers, protect
 Requires at least: 2.9

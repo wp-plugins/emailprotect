@@ -11,7 +11,7 @@ Protect e-mail addresses from being found by spam spiders (or any other crawlers
 == Description ==
 
 EMAILProtect use regular expression to locate, split and replace the e-mail string 
-with a JavaScript function - which put the parts back together and print an clickable 
+with a JavaScript function - which put the parts back together and print a clickable 
 e-mailaddress.
 
 Most crawlers thees days are "non-javascript crawlers" (to speed up the crawling process)

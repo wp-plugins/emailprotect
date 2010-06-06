@@ -1,11 +1,10 @@
 <?php
 /*
 Plugin Name: EMAILProtect
-Version: 1.5
+Version: 1.4
 Description: Protect e-mail addresses from SPAM spiders
 Author: Jacob Hallsten
 Author URI: http://amateurs-exchange.blogspot.com
-Plugin URI: http://amateurs-exchange.blogspot.com/2010/05/secure-e-mail-addresses-in-wordpress.html
 Thanks: Deadmau5
 */
 
@@ -27,26 +26,23 @@ function EMAILProtect($content)
 	-------------------------------------------------------------- */
 	
 	# Accepted surounding tags
-	$tags = array('strong', 'em', 'span', 'div', 'p', 'li', 'td', 'a');
+	$tags = array('strong', 'em', 'span', 'div', 'p', 'li', 'td');
 	
 	# Debug mode (1 = Yes, 0 = No);
 	$debug_mode = 0;
-	
-	# Make all links clickable
-	$allClickable = 1;
 	
 	# Clear $output
 	$output = '';
 	
 	# Secures the accepted surounding tags from interfering with the regex
-	$tagsStart = '<' . implode('[^>]*>|<', $tags) . '[^>]*>';
+	$tagsStart = '<' . implode('[^>]*>|<', $tags) . '>';
 	$tagsEnd = '<\/' . implode('>|<\/', $tags) . '>';
 	
 	# Regex secure ASCII signs
 	$accepted = "a-z0-9\!\#\$\%\&\*\+\-\/\=\?\^\_\`\{\|\}\~\'";
 	
 	# Regualar expression pattern
-	$pattern = "/(^|\s|" . $tagsStart . ")(([" . $accepted . "]+)@([a-z0-9\-]+)\.([a-z\.]{2,6}))(?:\s|$|" . $tagsEnd . ")/Ui";
+	$pattern = "/(?:^|\s|" . $tagsStart . ")(([" . $accepted . "]+)@([a-z0-9\-]+)\.([a-z\.]{2,6}))(?:\s|$|" . $tagsEnd . ")/Ui";
 	
 	# Breaks contents rows to an array
 	$all = explode("\n", $content);
@@ -63,31 +59,9 @@ function EMAILProtect($content)
 		
 		if( count($matches) > 0 )
 		{
-			# Default display mode
-			$displayLink = 0;
-			$isLink = 0;
-			
-			# Removes everything except the accual HTML tag
-			preg_match("/^<([a-z]+)[^>]*>$/i", trim($matches[1]), $suroundingTags);
-			
-			# Surounding tag is a link
-			if(strtolower(trim($suroundingTags[1])) == 'a')
-				$isLink = 1; 
-			
-			# If every e-mail address should be rewritten as clickable
-			# or if the surounding tag is a link.
-			if($allClickable === 1 or $isLink === 1)
-				$displayLink = 1;
-			
-			# Decides what to replace
-			if($isLink === 1)
-				$replace = $matches[0];
-			else
-				$replace = $matches[2];
-			
 			# Replaces the string with a JS
-			$replacement = "<script type='text/javascript'>plug_emp('{$displayLink}','{$matches[5]}','{$matches[3]}','{$matches[4]}');</script>";
-			$row = str_replace($replace, $replacement, $row);
+			$replacement = "<script type='text/javascript'>plug_emp('{$matches[4]}','{$matches[2]}','{$matches[3]}');</script>";
+			$row = str_replace($matches[1], $replacement, $row);
 		}
 		
 		$output .= $row . "\n";
@@ -103,7 +77,7 @@ if( !is_admin() )
 	$js_path = $wpurl . '/wp-content/plugins/emailprotect/EMAILProtect.js';
 	
 	# Add the JS-file to the HEAD-tag
-	wp_enqueue_script('EMAILProtect', $js_path, array(), '0.2');
+	wp_enqueue_script('EMAILProtect', $js_path, array(), '0.1');
 	
 	# Applies protect-filer to content.
 	add_filter('the_content', 'EMAILProtect', 2);

@@ -27,6 +27,9 @@ JavaScript file.
 1. Upload `EMAILProtect.php` and `EMAILProtect.js` to: `/wp-content/plugins/emailprotect/`
 2. Activate the plugin through the 'Plugins' menu in Wordpress
 
+By version 1.5 you're able to decide if you want to rewrite all the e-mail addresses or just the
+once surrounded by a link tag. You do this by changing row *36* in the PHP-file to *$allClickable = 0;*.
+
 == Changelog ==
 
 = 1.5 =

@@ -1,7 +1,7 @@
 === EMAILProtect ===
 Contributors: hallis
 Donate link: http://amateurs-exchange.blogspot.com/
-Tags: email, spiders, crawlers, protect
+Tags: email, protect, emailprotect, spiders, crawlers, spam
 Requires at least: 2.9
 Tested up to: 2.9.2
 Stable tag: 1.5

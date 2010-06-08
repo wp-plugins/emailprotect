@@ -4,7 +4,7 @@ Donate link: http://amateurs-exchange.blogspot.com/
 Tags: email, protect, emailprotect, spiders, crawlers, spam
 Requires at least: 2.8.5
 Tested up to: 2.9.2
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 
 Protect e-mail addresses from being found by spam spiders (or any other crawlers).
 
@@ -31,6 +31,9 @@ By version 1.5 you're able to decide if you want to rewrite all the e-mail addre
 once surrounded by a link tag. You do this by changing row *36* in the PHP-file to: *$allClickable = 0;*
 
 == Changelog ==
+
+= 1.5.3 =
+* Minor bug fix
 
 = 1.5.2 =
 * The problem with more than one e-mail address on one row is solved

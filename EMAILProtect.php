@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: EMAILProtect
-Version: 1.5.2
+Version: 1.5.3
 Description: Protect e-mail addresses from SPAM spiders
 Author: Jacob Hallsten
 Author URI: http://amateurs-exchange.blogspot.com
@@ -39,14 +39,13 @@ function EMAILProtect($content)
 	$output = '';
 	
 	# Secures the accepted surounding tags from interfering with the regex
-	$tagsStart = '<' . implode('[^>]*>|<', $tags) . '[^>]*>';
-	$tagsEnd = '<\/' . implode('>|<\/', $tags) . '>';
+	$tags = '<' . implode('[^>]*>|<', $tags) . '[^>]*>|' . '<\/' . implode('>|<\/?', $tags) . '>';
 	
 	# Regex secure ASCII signs
 	$accepted = "a-z0-9\!\#\$\%\&\*\+\-\/\=\?\^\_\`\{\|\}\~\'";
 	
 	# Regualar expression pattern
-	$pattern = "/(^|\s|" . $tagsStart . ")(([" . $accepted . "]+)@([a-z0-9\-]+)\.([a-z\.]{2,6}))(?:\s|$|" . $tagsEnd . ")/Ui";
+	$pattern = "/(^|\s|" . $tags . ")(([" . $accepted . "]+)@([a-z0-9\-]+)\.([a-z\.]{2,6}))(?:\s|$|" . $tags . ")/Ui";
 	
 	# Breaks contents rows to an array
 	$all = explode("\n", $content);

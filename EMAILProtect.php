@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: EMAILProtect
-Version: 1.5
+Version: 1.5.2
 Description: Protect e-mail addresses from SPAM spiders
 Author: Jacob Hallsten
 Author URI: http://amateurs-exchange.blogspot.com
@@ -27,7 +27,7 @@ function EMAILProtect($content)
 	-------------------------------------------------------------- */
 	
 	# Accepted surounding tags
-	$tags = array('strong', 'em', 'span', 'div', 'p', 'li', 'td', 'a');
+	$tags = array('strong', 'em', 'span', 'div', 'p', 'li', 'td', 'a', 'br');
 	
 	# Debug mode (1 = Yes, 0 = No);
 	$debug_mode = 0;
@@ -54,24 +54,24 @@ function EMAILProtect($content)
 	# Loop all the rows
 	foreach( $all as $row )
 	{
-		preg_match($pattern, $row, $matches);
-		
+		preg_match_all($pattern, $row, $matches);
 		# If debug mode is active and the regex gave an error
 		if( $debug_mode === 1 and $matches === false ) {
 			die('An error has occurred in preg_match');
 		}
 		
-		if( count($matches) > 0 )
+		# Loop every found match
+		for($i = 0; $i < count($matches[0]); $i++)
 		{
 			# Default display mode
 			$displayLink = 0;
 			$isLink = 0;
 			
 			# Removes everything except the accual HTML tag
-			preg_match("/^<([a-z]+)[^>]*>$/i", trim($matches[1]), $suroundingTags);
+			preg_match("/^<([a-z]+)[^>]*>$/i", trim($matches[1][$i]), $suroundingTags);
 			
 			# Surounding tag is a link
-			if(strtolower(trim($suroundingTags[1])) == 'a')
+			if(strtolower(trim($suroundingTags[1])) === 'a')
 				$isLink = 1; 
 			
 			# If every e-mail address should be rewritten as clickable
@@ -81,12 +81,12 @@ function EMAILProtect($content)
 			
 			# Decides what to replace
 			if($isLink === 1)
-				$replace = $matches[0];
+				$replace = $matches[0][$i];
 			else
-				$replace = $matches[2];
+				$replace = $matches[2][$i];
 			
 			# Replaces the string with a JS
-			$replacement = "<script type='text/javascript'>plug_emp('{$displayLink}','{$matches[5]}','{$matches[3]}','{$matches[4]}');</script>";
+			$replacement = "<script type='text/javascript'>plug_emp('{$displayLink}','{$matches[5][$i]}','{$matches[3][$i]}','{$matches[4][$i]}');</script>";
 			$row = str_replace($replace, $replacement, $row);
 		}
 		

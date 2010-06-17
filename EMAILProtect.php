@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: EMAILProtect
-Version: 1.5.3
-Description: Protect e-mail addresses from SPAM spiders
+Version: 1.5.7
+Description: Protects e-mail addresses from being found by spam spiders (or any other web crawler).
 Author: Jacob Hallsten
 Author URI: http://amateurs-exchange.blogspot.com
 Plugin URI: http://amateurs-exchange.blogspot.com/2010/05/secure-e-mail-addresses-in-wordpress.html
@@ -26,26 +26,26 @@ function EMAILProtect($content)
 	
 	-------------------------------------------------------------- */
 	
-	# Accepted surounding tags
-	$tags = array('strong', 'em', 'span', 'div', 'p', 'li', 'td', 'a', 'br');
-	
 	# Debug mode (1 = Yes, 0 = No);
 	$debug_mode = 0;
 	
 	# Make all links clickable
 	$allClickable = 1;
 	
-	# Clear $output
+	# Clear vars
 	$output = '';
 	
-	# Secures the accepted surounding tags from interfering with the regex
-	$tags = '<' . implode('[^>]*>|<', $tags) . '[^>]*>|' . '<\/' . implode('>|<\/?', $tags) . '>';
-	
 	# Regex secure ASCII signs
-	$accepted = "a-z0-9\!\#\$\%\&\*\+\-\/\=\?\^\_\`\{\|\}\~\'";
+	$accepted = "a-z0-9\.\!\#\$\%\&\*\+\-\/\=\?\^\_\`\{\|\}\~\'";
+	
+	# Email regex pattern
+	$email = '[' . $accepted . ']+@[a-z0-9\-]+\.[a-z]{2,6}';
+	
+	# Email as a link
+	$alink = '<a href=(?:\'|\")mailto:(?:\s)?(' . $email . ')(?:\"|\')>([^<]+)<\/a>';
 	
 	# Regualar expression pattern
-	$pattern = "/(^|\s|" . $tags . ")(([" . $accepted . "]+)@([a-z0-9\-]+)\.([a-z\.]{2,6}))(?:\s|$|" . $tags . ")/Ui";
+	$pattern = '/(?:^|\s|<\/?[a-z]+[^>]*>)(' . $alink . '|' . $email . ')(?:<\/?[a-z]+[^>]*>|\s|$)/Ui';
 	
 	# Breaks contents rows to an array
 	$all = explode("\n", $content);
@@ -53,42 +53,74 @@ function EMAILProtect($content)
 	# Loop all the rows
 	foreach( $all as $row )
 	{
-		preg_match_all($pattern, $row, $matches);
+		@preg_match_all($pattern, $row, $matches);
+		
 		# If debug mode is active and the regex gave an error
 		if( $debug_mode === 1 and $matches === false ) {
-			die('An error has occurred in preg_match');
+			die('An error has occurred in preg_match_all');
+			return;
+		}
+		elseif($matches === false ) {
+			return;
 		}
 		
+		# Removes unnecessary parts
+		unset($matches[0]);
+		$matches = array_values($matches);
+		
 		# Loop every found match
-		for($i = 0; $i < count($matches[0]); $i++)
+		for( $i = 0; $i < count( $matches[0] ); $i++ )
 		{
 			# Default display mode
-			$displayLink = 0;
+			$displayLink = 'false';
 			$isLink = 0;
 			
-			# Removes everything except the accual HTML tag
-			preg_match("/^<([a-z]+)[^>]*>$/i", trim($matches[1][$i]), $suroundingTags);
+			$p[$i]['rewrite'] = $matches[0][$i];
+			$p[$i]['email'] = $matches[1][$i];
+			$p[$i]['text'] = str_replace(";emp:", "&#59;emp&#58;", $matches[2][$i]);
+			
+			# If match isn't already a link
+			if( empty($p[$i]['email']) )
+				$p[$i]['email'] = $matches[0][$i];
 			
 			# Surounding tag is a link
-			if(strtolower(trim($suroundingTags[1])) === 'a')
+			if( !empty($p[$i]['text']) )
 				$isLink = 1; 
 			
 			# If every e-mail address should be rewritten as clickable
 			# or if the surounding tag is a link.
 			if($allClickable === 1 or $isLink === 1)
-				$displayLink = 1;
+				$displayLink = 'true';
 			
-			# Decides what to replace
-			if($isLink === 1)
-				$replace = $matches[0][$i];
-			else
-				$replace = $matches[2][$i];
+			# Locates the parts of the email
+			preg_match("/([^@]+)@([^\.]+)\.([a-z\.]+)/i", $p[$i]['email'], $emailParts);
+			unset( $emailParts[0] );
+			$emailParts = array_values($emailParts);
 			
-			# Replaces the string with a JS
-			$replacement = "<script type='text/javascript'>plug_emp('{$displayLink}','{$matches[5][$i]}','{$matches[3][$i]}','{$matches[4][$i]}');</script>";
-			$row = str_replace($replace, $replacement, $row);
+			# Decides what order to place to parts
+			$order = array($emailParts[2], $emailParts[1], $emailParts[0], $p[$i]['text']);
+			$parts = array();
+			
+			# Shuffle-signs
+			$alpha = "abcdef1234560#.-*";
+			
+			# Separation mark
+			$separate = ';emp:';
+			
+			foreach( $order as $part ){
+				if( !empty($part) )
+					$parts[] = substr(str_shuffle($alpha), 3, mt_rand(0, strlen($alpha))).$separate.$part;
+			}
+			
+			# Prepair for re-writing
+			$plug_emp = implode($separate, $parts);
+			$replacement = "<script type='text/javascript'>plug_emp({$displayLink}, '={$plug_emp}');</script>";
+			
+			# Re-write the email to a JavaScript
+			$row = str_replace($p[$i]['rewrite'], $replacement, $row);
 		}
 		
+		# Put all rows back together
 		$output .= $row . "\n";
 	}
 	
@@ -102,7 +134,7 @@ if( !is_admin() )
 	$js_path = $wpurl . '/wp-content/plugins/emailprotect/EMAILProtect.js';
 	
 	# Add the JS-file to the HEAD-tag
-	wp_enqueue_script('EMAILProtect', $js_path, array(), '0.2');
+	wp_enqueue_script('EMAILProtect', $js_path, array(), '0.8');
 	
 	# Applies protect-filer to content.
 	add_filter('the_content', 'EMAILProtect', 2);

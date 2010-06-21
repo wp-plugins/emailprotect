@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: EMAILProtect
-Version: 1.5.7
+Version: 1.5.8
 Description: Protects e-mail addresses from being found by spam spiders (or any other web crawler).
 Author: Jacob Hallsten
 Author URI: http://amateurs-exchange.blogspot.com
@@ -39,10 +39,10 @@ function EMAILProtect($content)
 	$accepted = "a-z0-9\.\!\#\$\%\&\*\+\-\/\=\?\^\_\`\{\|\}\~\'";
 	
 	# Email regex pattern
-	$email = '[' . $accepted . ']+@[a-z0-9\-]+\.[a-z]{2,6}';
+	$email = '[' . $accepted . ']+@(?:[a-z0-9\-]+\.)?[a-z0-9\-]+\.[a-z]{2,6}';
 	
 	# Email as a link
-	$alink = '<a href=(?:\'|\")mailto:(?:\s)?(' . $email . ')(?:\"|\')>([^<]+)<\/a>';
+	$alink = '<a[\w\s\=\"\']*href=(?:\'|\")mailto:(?:\s)?(' . $email . ')(?:\"|\')[^>]*>([^<]+)<\/a>';
 	
 	# Regualar expression pattern
 	$pattern = '/(?:^|\s|<\/?[a-z]+[^>]*>)(' . $alink . '|' . $email . ')(?:<\/?[a-z]+[^>]*>|\s|$)/Ui';

@@ -37,6 +37,12 @@ to: *$allClickable = 0;*
 
 == Changelog ==
 
+= 1.5.8 =
+
+* Added support for second level domains (SLD) with a dot (e.g sub.domain.com)
+* Better support of "mailto:" links
+* Minor bug fix
+
 = 1.5.7 =
 
 * Works with all surrounding HTML-tags

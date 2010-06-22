@@ -3,8 +3,8 @@ Contributors: hallis
 Donate link: http://amateurs-exchange.blogspot.com/
 Tags: email, protect, emailprotect, spiders, crawlers, spam
 Requires at least: 2.8.5
-Tested up to: 2.9.2
-Stable tag: 1.5.4
+Tested up to: 3.0
+Stable tag: 1.5.8
 
 Protects e-mail addresses from being found by spam spiders (or any other web crawler).
 
